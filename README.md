@@ -17,7 +17,7 @@ Esta es una aplicación sencilla de lista de tareas (ToDo List) que utiliza Fire
 ## Como se ejecuta en local
 
 - Navegador
-- Abrir el archivo INDEX.HTML que hay fuera de la carpeta del proyecto
+- Abrir el archivo PruebaLocal.html que hay fuera de la carpeta del proyecto
   
 
 
