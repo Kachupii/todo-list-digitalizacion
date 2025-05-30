@@ -13,11 +13,3 @@ Esta es una aplicación sencilla de lista de tareas (ToDo List) que utiliza Fire
 - Servidor local para servir el archivo HTML (puede ser live-server, VSCode Live Server, o cualquier servidor estático).
 
 ---
-
-## Cómo se ejecuta en local
-
-1. Clonar el repositorio:
-
-```bash
-git clone https://github.com/tuusuario/tu-proyecto-firebase-todo.git
-cd tu-proyecto-firebase-todo
