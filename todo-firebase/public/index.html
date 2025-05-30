@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Lista de Tareas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .todo-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+        .add-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9ff, #e8effe);
+            border-radius: 15px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .todos-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .todos-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .todos-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .todos-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #f0f4f8;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .todo-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .todo-item.completed {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .todo-checkbox.completed {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .todo-text.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-text.editing {
+            display: none;
+        }
+
+        .edit-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            display: none;
+        }
+
+        .edit-input.active {
+            display: block;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .save-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #229954;
+            transform: scale(1.1);
+        }
+
+        .cancel-btn {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #7f8c8d;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .firebase-config {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .firebase-config strong {
+            color: #d63031;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .input-container {
+                flex-direction: column;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Mi Lista de Tareas</h1>
+            <p>Organiza tu día de manera efectiva</p>
+        </div>
+
+
+
+        <div class="input-container">
+            <input type="text" id="todoInput" class="todo-input" placeholder="¿Qué necesitas hacer hoy?" maxlength="200">
+            <button id="addBtn" class="add-btn">
+                <span>➕ Agregar</span>
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span id="totalTodos" class="stat-number">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat">
+                <span id="completedTodos" class="stat-number">0</span>
+                <span class="stat-label">Completadas</span>
+            </div>
+            <div class="stat">
+                <span id="pendingTodos" class="stat-number">0</span>
+                <span class="stat-label">Pendientes</span>
+            </div>
+        </div>
+
+        <div class="todos-container">
+            <div id="todosContainer"></div>
+            <div id="loadingContainer" class="loading" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-firestore-compat.min.js"></script>
+
+    <script>
+        // 🔥 CONFIGURACIÓN DE FIREBASE - REEMPLAZA CON TUS CREDENCIALES
+        const firebaseConfig = {
+            apiKey: "tu-api-key",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            projectId: "tu-project-id",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "tu-app-id"
+        };
+
+        // Inicializar Firebase (descomenta cuando tengas tu configuración)
+        // firebase.initializeApp(firebaseConfig);
+        // const db = firebase.firestore();
+
+        // 🎭 SIMULACIÓN LOCAL (para demostración - elimina cuando uses Firebase real)
+        class MockFirestore {
+            constructor() {
+                this.todos = this.loadFromStorage();
+                this.listeners = [];
+            }
+
+            collection(name) {
+                return {
+                    add: async (data) => {
+                        const newTodo = {
+                            id: Date.now().toString(),
+                            ...data,
+                            createdAt: new Date()
+                        };
+                        this.todos.push(newTodo);
+                        this.saveToStorage();
+                        this.notifyListeners();
+                        return { id: newTodo.id };
+                    },
+                    onSnapshot: (callback) => {
+                        this.listeners.push(callback);
+                        setTimeout(() => {
+                            callback({
+                                docs: this.todos.map(todo => ({
+                                    id: todo.id,
+                                    data: () => todo
+                                }))
+                            });
+                        }, 100);
+                        return () => {
+                            const index = this.listeners.indexOf(callback);
+                            if (index > -1) this.listeners.splice(index, 1);
+                        };
+                    }
+                };
+            }
+
+            doc(collection, id) {
+                return {
+                    update: async (data) => {
+                        const index = this.todos.findIndex(t => t.id === id);
+                        if (index !== -1) {
+                            this.todos[index] = { ...this.todos[index], ...data };
+                            this.saveToStorage();
+                            this.notifyListeners();
+                        }
+                    },
+                    delete: async () => {
+                        this.todos = this.todos.filter(t => t.id !== id);
+                        this.saveToStorage();
+                        this.notifyListeners();
+                    }
+                };
+            }
+
+            loadFromStorage() {
+                try {
+                    return JSON.parse(localStorage.getItem('todoApp_todos') || '[]');
+                } catch {
+                    return [];
+                }
+            }
+
+            saveToStorage() {
+                localStorage.setItem('todoApp_todos', JSON.stringify(this.todos));
+            }
+
+            notifyListeners() {
+                setTimeout(() => {
+                    this.listeners.forEach(callback => {
+                        callback({
+                            docs: this.todos.map(todo => ({
+                                id: todo.id,
+                                data: () => todo
+                            }))
+                        });
+                    });
+                }, 50);
+            }
+        }
+
+        // Usar simulación local (reemplaza con: const db = firebase.firestore();)
+        const db = new MockFirestore();
+
+        // 📱 VARIABLES GLOBALES
+        let todos = [];
+        let editingId = null;
+
+        // 🎯 ELEMENTOS DEL DOM
+        const todoInput = document.getElementById('todoInput');
+        const addBtn = document.getElementById('addBtn');
+        const todosContainer = document.getElementById('todosContainer');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const totalTodosSpan = document.getElementById('totalTodos');
+        const completedTodosSpan = document.getElementById('completedTodos');
+        const pendingTodosSpan = document.getElementById('pendingTodos');
+
+        // 🚀 INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            setupEventListeners();
+        });
+
+        function initializeApp() {
+            showLoading(true);
+            
+            // Escuchar cambios en Firestore
+            const unsubscribe = db.collection('todos').onSnapshot((snapshot) => {
+                todos = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // Ordenar por fecha de creación (más reciente primero)
+                todos.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                    return dateB - dateA;
+                });
+                
+                renderTodos();
+                updateStats();
+                showLoading(false);
+            }, (error) => {
+                console.error('Error al escuchar cambios:', error);
+                showLoading(false);
+            });
+        }
+
+        function setupEventListeners() {
+            // Agregar tarea
+            addBtn.addEventListener('click', addTodo);
+            todoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTodo();
+            });
+
+            // Auto-resize del input
+            todoInput.addEventListener('input', () => {
+                if (todoInput.value.length > 0) {
+                    addBtn.textContent = '🚀 Crear';
+                } else {
+                    addBtn.textContent = '➕ Agregar';
+                }
+            });
+        }
+
+        // ✅ AGREGAR TAREA
+        async function addTodo() {
+            const text = todoInput.value.trim();
+            if (!text) return;
+
+            try {
+                addBtn.disabled = true;
+                addBtn.textContent = '⏳ Creando...';
+
+                await db.collection('todos').add({
+                    text: text,
+                    completed: false,
+                    createdAt: new Date()
+                });
+
+                todoInput.value = '';
+                addBtn.textContent = '➕ Agregar';
+            } catch (error) {
+                console.error('Error al agregar tarea:', error);
+                alert('Error al agregar la tarea. Inténtalo de nuevo.');
+            } finally {
+                addBtn.disabled = false;
+            }
+        }
+
+        // 🎨 RENDERIZAR TAREAS
+        function renderTodos() {
+            if (todos.length === 0) {
+                todosContainer.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/>
+                        </svg>
+                        <h3>¡Todo listo!</h3>
+                        <p>No tienes tareas pendientes. ¡Agrega una nueva tarea arriba!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            todosContainer.innerHTML = todos.map(todo => `
+                <div class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
+                    <div class="todo-checkbox ${todo.completed ? 'completed' : ''}" onclick="toggleTodo('${todo.id}')">
+                        ${todo.completed ? '✓' : ''}
+                    </div>
+                    <div class="todo-text ${todo.completed ? 'completed' : ''} ${editingId === todo.id ? 'editing' : ''}" id="text-${todo.id}">
+                        ${escapeHtml(todo.text)}
+                    </div>
+                    <input type="text" class="edit-input ${editingId === todo.id ? 'active' : ''}" id="edit-${todo.id}" value="${escapeHtml(todo.text)}">
+                    <div class="todo-actions">
+                        ${editingId === todo.id ? `
+                            <button class="action-btn save-btn" onclick="saveTodo('${todo.id}')" title="Guardar">💾</button>
+                            <button class="action-btn cancel-btn" onclick="cancelEdit()" title="Cancelar">❌</button>
+                        ` : `
+                            <button class="action-btn edit-btn" onclick="editTodo('${todo.id}')" title="Editar">✏️</button>
+                            <button class="action-btn delete-btn" onclick="deleteTodo('${todo.id}')" title="Eliminar">🗑️</button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ✅ COMPLETAR/DESCOMPLETAR TAREA
+        async function toggleTodo(id) {
+            try {
+                const todo = todos.find(t => t.id === id);
+                if (!todo) return;
+
+                await db.doc('todos', id).update({
+                    completed: !todo.completed
+                });
+            } catch (error) {
+                console.error('Error al actualizar tarea:', error);
+            }
+        }
+
+        // ✏️ EDITAR TAREA
+        function editTodo(id) {
+            editingId = id;
+            renderTodos();
+            
+            const editInput = document.getElementById(`edit-${id}`);
+            if (editInput) {
+                editInput.focus();
+                editInput.setSelectionRange(editInput.value.length, editInput.value.length);
+                
+                editInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') saveTodo(id);
+                    if (e.key === 'Escape') cancelEdit();
+                });
+            }
+        }
+
+        // 💾 GUARDAR EDICIÓN
+        async function saveTodo(id) {
+            const editInput = document.getElementById(`edit-${id}`);
+            const newText = editInput.value.trim();
+            
+            if (!newText) {
+                alert('El texto no puede estar vacío');
+                return;
+            }
+
+            try {
+                await db.doc('todos', id).update({
+                    text: newText
+                });
+                editingId = null;
+            } catch (error) {
+                console.error('Error al guardar tarea:', error);
+            }
+        }
+
+        // ❌ CANCELAR EDICIÓN
+        function cancelEdit() {
+            editingId = null;
+            renderTodos();
+        }
+
+        // 🗑️ ELIMINAR TAREA
+        async function deleteTodo(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar esta tarea?')) return;
+
+            try {
+                await db.doc('todos', id).delete();
+            } catch (error) {
+                console.error('Error al eliminar tarea:', error);
+            }
+        }
+
+        // 📊 ACTUALIZAR ESTADÍSTICAS
+        function updateStats() {
+            const total = todos.length;
+            const completed = todos.filter(t => t.completed).length;
+            const pending = total - completed;
+
+            totalTodosSpan.textContent = total;
+            completedTodosSpan.textContent = completed;
+            pendingTodosSpan.textContent = pending;
+        }
+
+        // 🔄 MOSTRAR/OCULTAR LOADING
+        function showLoading(show) {
+            loadingContainer.style.display = show ? 'block' : 'none';
+        }
+
+        // 🛡️ ESCAPE HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 🎉 EFECTOS VISUALES
+        function addVisualFeedback(element, type) {
+            element.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        // Hacer funciones disponibles globalmente
+        window.toggleTodo = toggleTodo;
+        window.editTodo = editTodo;
+        window.saveTodo = saveTodo;
+        window.cancelEdit = cancelEdit;
+        window.deleteTodo = deleteTodo;
+    </script>
+</body>
+</html>
