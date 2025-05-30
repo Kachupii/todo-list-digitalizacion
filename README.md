@@ -13,3 +13,11 @@ Esta es una aplicación sencilla de lista de tareas (ToDo List) que utiliza Fire
 - Servidor local para servir el archivo HTML (puede ser live-server, VSCode Live Server, o cualquier servidor estático).
 
 ---
+
+## Como se ejecuta en local
+
+- Navegador
+- Abrir el archivo INDEX.HTML que hay fuera de la carpeta del proyecto
+  
+
+
