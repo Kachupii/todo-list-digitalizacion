@@ -19,5 +19,8 @@ Esta es una aplicación sencilla de lista de tareas (ToDo List) que utiliza Fire
 - Navegador
 - Abrir el archivo PruebaLocal.html que hay fuera de la carpeta del proyecto
   
+---
 
+## Despliegue
+- Para desplegar la app en Firebase Hosting, primero configura Firebase con firebase init seleccionando Hosting, luego construye o prepara tus archivos (en este caso, solo el HTML está listo), y finalmente ejecuta firebase deploy para subir y publicar la app en la URL proporcionada por Firebase.
 
